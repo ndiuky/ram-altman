@@ -559,7 +559,7 @@ function Save-RamAltmanScript {
     }
 
     $downloadUrl = if ($Url) { $Url } else { $DefaultUrl }
-    Write-Output "Downloading $downloadUrl"
+    Write-Host "Downloading $downloadUrl"
     if ($PSVersionTable.PSVersion.Major -lt 6) {
         Invoke-WebRequest -Uri $downloadUrl -OutFile $saved -UseBasicParsing
     } else {
