@@ -1,6 +1,6 @@
 # Ram-Altman
 
-**A bash script that writes to Sam Altman once a day to report the RAM he missed.**
+**A bash script (and PowerShell port) that writes to Sam Altman once a day to report the RAM he missed.**
 
 Read the sample emails at **[ram-altman.lol](https://ram-altman.lol)**, no install needed.
 
@@ -9,6 +9,7 @@ Read the sample emails at **[ram-altman.lol](https://ram-altman.lol)**, no insta
 ![Utilization: maybe 5%](https://img.shields.io/badge/utilization-maybe%205%25-orange)
 ![Emails: 1 per day](https://img.shields.io/badge/emails-1%20per%20day-blue)
 ![Written in Bash, not Electron](https://img.shields.io/badge/written%20in-bash%2C%20not%20electron-brightgreen)
+![Also in PowerShell](https://img.shields.io/badge/also%20in-PowerShell-5391FE)
 
 There is RAM in your computer. Right now. Just sitting there, in a *personal* computer, being personal.
 
@@ -33,6 +34,59 @@ So we wrote a script. If your machine has more than 10% of its RAM available, it
 - Logs every sample to CSV for when the auditors arrive
 - Ships with 14 tests, more than the DRAM market has had sensible outcomes
 - Is written in bash, as an Electron version would have solved the problem by using all the RAM
+- Also ships as PowerShell for Windows, because that RAM is sitting there too
+
+## PowerShell, for the other computers
+
+You don't need to clone anything. This prints the current evidence and sends nothing:
+
+```powershell
+irm https://raw.githubusercontent.com/ndiuky/ram-altman/main/ram-altman.ps1 | iex
+```
+
+That one-liner is safe by default: until a recipient is configured, it only reports
+the RAM. On Windows it reads the same "Available" figure Task Manager shows; on
+Linux with PowerShell 7 it reads `/proc/meminfo`, page cache and all.
+
+To configure it and install a scheduled task that samples every five minutes:
+
+```powershell
+$env:RAM_ALTMAN_TO          = 'you@example.com'
+$env:RAM_ALTMAN_FROM        = 'you@example.com'
+$env:RAM_ALTMAN_FROM_NAME   = 'Your Name'
+$env:RAM_ALTMAN_SMTP_SERVER = 'smtp.example.com'
+$env:RAM_ALTMAN_SMTP_PORT   = '587'
+$env:RAM_ALTMAN_SMTP_USER   = 'you@example.com'
+$env:RAM_ALTMAN_SMTP_PASS   = 'app-password'
+$env:RAM_ALTMAN_MODE        = 'install'
+
+irm https://raw.githubusercontent.com/ndiuky/ram-altman/main/ram-altman.ps1 | iex
+```
+
+Windows has no `sendmail`, so the PowerShell version talks SMTP. Create an
+app password with your mail provider; don't use your main password. The config
+is written to `%LOCALAPPDATA%\ram-altman\config.json` with user-only permissions,
+because the password is in there.
+
+Prefer files and arguments? Download the script and run it directly:
+
+```powershell
+.\ram-altman.ps1 -Action status
+.\ram-altman.ps1 -Action dry-run
+.\ram-altman.ps1 -Action test-mail   # send one now, ignore the threshold
+.\ram-altman.ps1 -Action uninstall   # remove the scheduled task (add -Purge for state too)
+.\ram-altman.ps1 -Action help
+```
+
+On Windows the scheduled task is called `Ram-Altman` and runs as you, every five
+minutes, while you're logged on. On Linux it prints the crontab line instead of
+editing your crontab, because one does not simply edit another person's crontab.
+
+The PowerShell version has its own 14-test harness on Linux/macOS:
+
+```bash
+./test-ram-altman-pwsh.sh
+```
 
 ## A sample of today's correspondence
 
@@ -74,7 +128,7 @@ On kernels older than 3.14, which have no `MemAvailable`, the script estimates i
 You'll need Linux, bash, and a working `sendmail`, `msmtp` or `mail` command. Your RAM is assumed.
 
 ```bash
-git clone https://github.com/IainKay/ram-altman.git
+git clone https://github.com/ndiuky/ram-altman.git
 cd ram-altman
 chmod +x ram-altman.sh test-ram-altman.sh
 
@@ -144,7 +198,10 @@ No.
 The memory accounting is. The correspondence isn't.
 
 **Does it work on macOS?**
-No, it reads `/proc/meminfo`. On the other hand, your RAM is probably soldered down, which makes you the hardest target in the global allocation programme.
+No, the scripts read `/proc/meminfo` or Windows performance counters. On the other hand, your RAM is probably soldered down, which makes you the hardest target in the global allocation programme.
+
+**Does the PowerShell version work on Windows?**
+Yes. It uses the same "Available" number Task Manager shows, and sends through SMTP because Windows has no `sendmail`. See [PowerShell, for the other computers](#powershell-for-the-other-computers).
 
 **Why is the threshold 10%?**
 Below that, your machine has suffered enough.
@@ -153,7 +210,7 @@ Below that, your machine has suffered enough.
 Briefly. It's then returned to the global pool, which is more than can be said for the rest of us.
 
 **Can I run the tests without emailing anyone?**
-Yes. `./test-ram-altman.sh` uses simulated memory and a fake `sendmail`. No inboxes are harmed.
+Yes. `./test-ram-altman.sh` uses simulated memory and a fake `sendmail`. `./test-ram-altman-pwsh.sh` does the same for the PowerShell version. No inboxes are harmed.
 
 **Can I see it without installing anything?**
 Yes. [ram-altman.lol](https://ram-altman.lol) cycles through the real emails, with sample figures.
