@@ -11,6 +11,18 @@ Read the sample emails at **[ram-altman.lol](https://ram-altman.lol)**, no insta
 ![Written in Bash, not Electron](https://img.shields.io/badge/written%20in-bash%2C%20not%20electron-brightgreen)
 ![Also in PowerShell](https://img.shields.io/badge/also%20in-PowerShell-5391FE)
 
+## Quick start (Windows / PowerShell)
+
+No clone, no install. This reports the current RAM and sends nothing:
+
+```powershell
+irm https://raw.githubusercontent.com/ndiuky/ram-altman/main/ram-altman.ps1 | iex
+```
+
+The script is [ram-altman.ps1](https://github.com/ndiuky/ram-altman/blob/main/ram-altman.ps1). Once you configure a recipient (see [PowerShell, for the other computers](#powershell-for-the-other-computers)), the same one-liner installs a scheduled task and starts the daily correspondence.
+
+On Linux, keep scrolling to [Installation](#installation-linux--bash) for the bash version.
+
 There is RAM in your computer. Right now. Just sitting there, in a *personal* computer, being personal.
 
 You may have thought of this as "a computer working normally". On a recent episode of [Cheeky Pint](https://gizmodo.com/sam-altman-youre-completely-right-about-ram-im-sorry-for-the-confusion-heres-what-happened-2000835208), the CEO of OpenAI offered another view:
@@ -123,7 +135,7 @@ Strictly speaking, the page cache is doing useful work, so counting it as availa
 
 On kernels older than 3.14, which have no `MemAvailable`, the script estimates it from free memory plus reclaimable cache. If you're on one of those, your RAM may be safe. Nobody's coming for that.
 
-## Installation
+## Installation (Linux / bash)
 
 You'll need Linux, bash, and a working `sendmail`, `msmtp` or `mail` command. Your RAM is assumed.
 
